@@ -12,6 +12,7 @@ import (
 type Square struct {
 	Pos      helpers.Coord
 	Clr      color.Color
+	Color    string
 	Size     float64
 	Occupied bool
 	Orig     color.Color
@@ -24,9 +25,12 @@ func (sq Square) Draw(dst *ebiten.Image) {
 	ebitenutil.DrawRect(dst, x, y, sq.Size, sq.Size, sq.Clr)
 }
 
-func (sq *Square) Activate(prev *Square) {
-	if prev != nil {
-		prev.Clr = prev.Orig
-	}
+func (sq *Square) Activate() {
 	sq.Clr = cfg.ActiveColor
+}
+
+func Deactivate(sqs []*Square) {
+	for _, sq := range sqs {
+		sq.Clr = sq.Orig
+	}
 }

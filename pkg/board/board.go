@@ -16,7 +16,7 @@ type Board struct {
 	Squares       [][]*square.Square
 	CurrPlayerIdx uint
 	Players       []*player.Player
-	PrevActive    *square.Square
+	PrevActives   []*square.Square
 }
 
 func makeSquares(w, h int) [][]*square.Square {
@@ -26,15 +26,18 @@ func makeSquares(w, h int) [][]*square.Square {
 		row := []*square.Square{}
 		for j := 0; j < w; j++ {
 			var sq_color color.Color
+			var sq_color_str string
 			if white {
 				sq_color = cfg.LightColor
+				sq_color_str = "white"
 			} else {
 				sq_color = cfg.DarkColor
+				sq_color_str = "black"
 			}
 
 			white = !white
 			coords := helpers.Coord{X: float64(j), Y: float64(i)}
-			row = append(row, &square.Square{Pos: coords, Size: float64(cfg.SquareSize), Clr: sq_color, Occupied: false, Orig: sq_color})
+			row = append(row, &square.Square{Pos: coords, Size: float64(cfg.SquareSize), Clr: sq_color, Color : sq_color_str, Occupied: false, Orig: sq_color})
 		}
 		squares = append(squares, row)
 		white = !white
@@ -84,7 +87,7 @@ func InitBoard(w int, h int) Board {
 	squares := makeSquares(w, h)
 	whitePlayer := player.Player{Color: "white", Pieces: genWhitePieces(w)}
 	blackPlayer := player.Player{Color: "black", Pieces: genBlackPieces(w)}
-	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}}
+	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives : []*square.Square{}}
 	board.UpdateInitialSquareState()
 	return board
 }
@@ -110,19 +113,35 @@ func (b *Board) Draw(dst *ebiten.Image) {
 func (b *Board) ManageClick() {
 	clicked, pos := events.CheckMouseEvents()
 	if clicked {
-		square := b.GetSquare(pos)
-		if square.Occupied {
-			// TODO : Generate Valid moves for that piece
-			piece := square.Piece
+		// Deactivating all previously activated sqs
+		square.Deactivate(b.PrevActives)
+
+		// Checking for the current player
+		sq := b.GetSquare(pos)
+		if sq.Occupied && sq.Piece.GetColor() == b.Players[b.CurrPlayerIdx].Color {
+			piece := sq.Piece
 			coords := piece.GenValidMoves()
-			moves := b.Players[b.CurrPlayerIdx].FilterMoves(coords, b.Squares)
+			curr_player := b.Players[b.CurrPlayerIdx]
+			var moves []helpers.Coord
+			switch piece.(type) {
+			case pieces.Pawn :
+				moves = curr_player.FilterPawnMoves(piece, coords, b.Squares)
+				break
+			default :
+				moves = curr_player.FilterMoves(coords, b.Squares)
+			}
 
+			
+			// Acitvating the current piece square
+			sq.Activate()
+			b.PrevActives = append(b.PrevActives, sq)
+			
+			// Activating all move squares
 			for _, move := range moves {
-				b.GetSquare(move).Activate(b.PrevActive)
+				b.GetSquare(move).Activate()
+				sq = b.GetSquare(move)
+				b.PrevActives = append(b.PrevActives, sq)
 			} 
-
-			square.Activate(b.PrevActive)
-			b.PrevActive = square
 		}
 	}
 }
