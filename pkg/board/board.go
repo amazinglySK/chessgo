@@ -2,6 +2,7 @@ package board
 
 import (
 	"image/color"
+	"log"
 
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/events"
@@ -15,6 +16,7 @@ import (
 type Board struct {
 	Squares       [][]*square.Square
 	CurrPlayerIdx uint
+	CurrPiece     pieces.Piece
 	Players       []*player.Player
 	PrevActives   []*square.Square
 }
@@ -37,7 +39,7 @@ func makeSquares(w, h int) [][]*square.Square {
 
 			white = !white
 			coords := helpers.Coord{X: float64(j), Y: float64(i)}
-			row = append(row, &square.Square{Pos: coords, Size: float64(cfg.SquareSize), Clr: sq_color, Color : sq_color_str, Occupied: false, Orig: sq_color})
+			row = append(row, &square.Square{Pos: coords, Size: float64(cfg.SquareSize), Clr: sq_color, Color: sq_color_str, Occupied: false, Orig: sq_color})
 		}
 		squares = append(squares, row)
 		white = !white
@@ -87,7 +89,7 @@ func InitBoard(w int, h int) Board {
 	squares := makeSquares(w, h)
 	whitePlayer := player.Player{Color: "white", Pieces: genWhitePieces(w)}
 	blackPlayer := player.Player{Color: "black", Pieces: genBlackPieces(w)}
-	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives : []*square.Square{}}
+	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}}
 	board.UpdateInitialSquareState()
 	return board
 }
@@ -101,13 +103,12 @@ func (b *Board) Draw(dst *ebiten.Image) {
 	for _, row := range b.Squares {
 		for _, s := range row {
 			s.Draw(dst)
+			if s.Piece != nil {
+				s.Piece.Draw(dst)
+			}
 		}
 	}
-	for _, player := range b.Players {
-		for _, piece := range player.Pieces {
-			piece.Draw(dst)
-		}
-	}
+
 }
 
 func (b *Board) ManageClick() {
@@ -116,33 +117,56 @@ func (b *Board) ManageClick() {
 		// Deactivating all previously activated sqs
 		square.Deactivate(b.PrevActives)
 
-		// Checking for the current player
 		sq := b.GetSquare(pos)
-		if sq.Occupied && sq.Piece.GetColor() == b.Players[b.CurrPlayerIdx].Color {
+		curr_player := b.Players[b.CurrPlayerIdx]
+
+		// Selecting a piece
+		if sq.Occupied && sq.Piece.GetColor() == curr_player.Color {
 			piece := sq.Piece
+			b.CurrPiece = piece
 			coords := piece.GenValidMoves()
-			curr_player := b.Players[b.CurrPlayerIdx]
 			var moves []helpers.Coord
 			switch piece.(type) {
-			case pieces.Pawn :
+			case *pieces.Pawn:
 				moves = curr_player.FilterPawnMoves(piece, coords, b.Squares)
 				break
-			default :
+			default:
 				moves = curr_player.FilterMoves(coords, b.Squares)
 			}
 
-			
 			// Acitvating the current piece square
 			sq.Activate()
 			b.PrevActives = append(b.PrevActives, sq)
-			
+
+			curr_player.ValidMoves = moves
+
 			// Activating all move squares
 			for _, move := range moves {
 				b.GetSquare(move).Activate()
 				sq = b.GetSquare(move)
 				b.PrevActives = append(b.PrevActives, sq)
-			} 
+			}
+
+			return
 		}
+
+		// Probably a capture or a normal move
+		if b.CurrPiece != nil {
+				if (sq.Occupied && sq.Piece.GetColor() != curr_player.Color) || !sq.Occupied {
+				prev_sq := b.GetSquare(*b.CurrPiece.GetPos())
+				move_sq := b.GetSquare(pos)
+				if curr_player.MovePiece(b.CurrPiece, move_sq, prev_sq) {
+					b.CurrPiece = nil
+					// Swapping the current player
+					b.CurrPlayerIdx = uint(len(b.Players)) - (b.CurrPlayerIdx + 1)
+				}else {
+					log.Println("invalid move")
+				}
+
+				return
+			}
+		}
+
 	}
 }
 

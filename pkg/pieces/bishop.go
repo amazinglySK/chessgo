@@ -13,7 +13,7 @@ type Bishop struct {
 	Sprite  *ebiten.Image
 }
 
-func InitBishop(pos helpers.Coord, color string) Bishop {
+func InitBishop(pos helpers.Coord, color string) *Bishop {
 	var sprite *ebiten.Image
 	switch color {
 	case "white":
@@ -22,7 +22,7 @@ func InitBishop(pos helpers.Coord, color string) Bishop {
 		sprite = BlackSprites.SubImage(image.Rect(16, 16, 32, 32)).(*ebiten.Image)
 	}
 
-	return Bishop{pos, color, sprite}
+	return &Bishop{pos, color, sprite}
 
 }
 
@@ -50,3 +50,7 @@ func (b Bishop) GetPos() *helpers.Coord {
 func (b Bishop) GetColor() string {
 	return b.Color
 }
+
+func (b *Bishop) Move(pos helpers.Coord) {
+	b.CurrPos = pos
+} 

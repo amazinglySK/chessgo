@@ -6,5 +6,5 @@ type Coord struct {
 }
 
 func (c Coord) Equal(comp Coord) bool {
-	return c.X == comp.X && c.Y == comp.Y
+	return int(c.X) == int(comp.X) && int(c.Y) == int(comp.Y)
 }

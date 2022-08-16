@@ -13,7 +13,7 @@ type King struct {
 	Sprite  *ebiten.Image
 }
 
-func InitKing(pos helpers.Coord, color string) King {
+func InitKing(pos helpers.Coord, color string) *King {
 	var sprite *ebiten.Image
 	switch color {
 	case "white":
@@ -22,7 +22,7 @@ func InitKing(pos helpers.Coord, color string) King {
 		sprite = BlackSprites.SubImage(image.Rect(16, 32, 32, 48)).(*ebiten.Image)
 	}
 
-	return King{pos, color, sprite}
+	return &King{pos, color, sprite}
 
 }
 
@@ -46,4 +46,8 @@ func (b King) GetPos() *helpers.Coord {
 
 func (b King) GetColor() string {
 	return b.Color
+}
+
+func (b *King) Move(pos helpers.Coord) {
+	b.CurrPos = pos
 }

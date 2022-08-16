@@ -13,7 +13,7 @@ type Queen struct {
 	Sprite  *ebiten.Image
 }
 
-func InitQueen(pos helpers.Coord, color string) Queen {
+func InitQueen(pos helpers.Coord, color string) *Queen {
 	var sprite *ebiten.Image
 	switch color {
 	case "white":
@@ -22,7 +22,7 @@ func InitQueen(pos helpers.Coord, color string) Queen {
 		sprite = BlackSprites.SubImage(image.Rect(0, 32, 16, 48)).(*ebiten.Image)
 	}
 
-	return Queen{pos, color, sprite}
+	return &Queen{pos, color, sprite}
 
 }
 
@@ -56,3 +56,9 @@ func (b Queen) GetPos() *helpers.Coord {
 func (b Queen) GetColor() string {
 	return b.Color
 }
+
+func (b *Queen) Move(pos helpers.Coord) {
+	b.CurrPos = pos
+}
+
+

@@ -36,7 +36,7 @@ func (b Knight) GenValidMoves() [][]helpers.Coord {
 
 }
 
-func InitKnight(pos helpers.Coord, color string) Knight {
+func InitKnight(pos helpers.Coord, color string) *Knight {
 	var sprite *ebiten.Image
 	switch color {
 	case "white":
@@ -45,7 +45,7 @@ func InitKnight(pos helpers.Coord, color string) Knight {
 		sprite = BlackSprites.SubImage(image.Rect(0, 16, 16, 32)).(*ebiten.Image)
 	}
 
-	return Knight{pos, color, sprite}
+	return &Knight{pos, color, sprite}
 }
 
 func (b Knight) GetPos() *helpers.Coord {
@@ -53,4 +53,8 @@ func (b Knight) GetPos() *helpers.Coord {
 }
 func (b Knight) GetColor() string {
 	return b.Color
+}
+
+func (b *Knight) Move(pos helpers.Coord) {
+	b.CurrPos = pos
 }

@@ -6,11 +6,14 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/square"
 )
 
+// Player object store the player color white/black and a set of valid moves of the current piece in focus and all the piece
 type Player struct {
 	Pieces []pieces.Piece
 	Color  string
+	ValidMoves []helpers.Coord
 }
 
+// FilterMoves filters moves for any normal moving pieces without any odds
 func (p Player) FilterMoves(moves [][]helpers.Coord, squares [][]*square.Square) []helpers.Coord {
 	valid_moves := []helpers.Coord{}
 	for _, set := range moves {
@@ -27,6 +30,7 @@ func (p Player) FilterMoves(moves [][]helpers.Coord, squares [][]*square.Square)
 	return valid_moves
 }
 
+// FilterPawnMoves is filtering for pawns so that they don't end up always showing a diagonal move available
 func (p Player) FilterPawnMoves(piece pieces.Piece, moves [][]helpers.Coord, squares [][]*square.Square) []helpers.Coord {
 	valid := []helpers.Coord{}
 	for _, set := range moves {
@@ -54,3 +58,20 @@ func (p Player) FilterPawnMoves(piece pieces.Piece, moves [][]helpers.Coord, squ
 
 	return valid
 }
+
+// MovePiece moves a given piece to a valid square. If the move's a valid move then returns true else returns false.
+func (p Player) MovePiece(piece pieces.Piece, sq *square.Square, prev_sq *square.Square) bool {
+	for _, c := range p.ValidMoves {
+		if c == sq.Pos {
+			prev_sq.Piece = nil
+			prev_sq.Occupied = false
+			sq.Piece = piece
+			sq.Occupied = true
+			piece.Move(sq.Pos)
+			return true
+		}
+	}
+	return false
+}
+
+

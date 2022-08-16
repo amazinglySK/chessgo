@@ -45,7 +45,7 @@ type Piece interface {
 	GenValidMoves() [][]helpers.Coord
 	GetPos() *helpers.Coord
 	GetColor() string
-	// Move()
+	Move(helpers.Coord)
 }
 
 func filterNegatives(coord [][]helpers.Coord) [][]helpers.Coord {

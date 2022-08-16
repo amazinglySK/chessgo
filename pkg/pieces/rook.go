@@ -26,7 +26,7 @@ func (b Rook) GenValidMoves() [][]helpers.Coord {
 	return filterNegatives(GenStraightMoves(b.CurrPos.X, b.CurrPos.Y))
 }
 
-func InitRook(pos helpers.Coord, color string) Rook {
+func InitRook(pos helpers.Coord, color string) *Rook {
 	var sprite *ebiten.Image
 	switch color {
 	case "white":
@@ -34,7 +34,7 @@ func InitRook(pos helpers.Coord, color string) Rook {
 	case "black":
 		sprite = BlackSprites.SubImage(image.Rect(16, 0, 32, 16)).(*ebiten.Image)
 	}
-	return Rook{pos, color, sprite}
+	return &Rook{pos, color, sprite}
 }
 
 func (b Rook) GetPos() *helpers.Coord {
@@ -43,4 +43,8 @@ func (b Rook) GetPos() *helpers.Coord {
 
 func (b Rook) GetColor() string {
 	return b.Color
+}
+
+func (b *Rook) Move(pos helpers.Coord) {
+	b.CurrPos = pos
 }
