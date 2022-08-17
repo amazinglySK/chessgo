@@ -6,7 +6,7 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/square"
 )
 
-// Player object store the player color white/black and a set of valid moves of the current piece in focus and all the piece
+// Player is an object store the player color white/black and a set of valid moves of the current piece in focus and all the piece
 type Player struct {
 	Pieces []pieces.Piece
 	Color  string
@@ -24,6 +24,9 @@ func (p Player) FilterMoves(moves [][]helpers.Coord, squares [][]*square.Square)
 				break
 			}
 			valid_moves = append(valid_moves, move)
+			if sq.Occupied && sq.Piece.GetColor() != p.Color{
+				break
+			}
 		}
 	}
 
@@ -48,7 +51,7 @@ func (p Player) FilterPawnMoves(piece pieces.Piece, moves [][]helpers.Coord, squ
 				}
 			} else {
 				// An allied piece
-				if sq.Occupied && sq.Piece.GetColor() == piece.GetColor() {
+				if sq.Occupied {
 					break
 				}
 				valid = append(valid, move)
@@ -73,5 +76,4 @@ func (p Player) MovePiece(piece pieces.Piece, sq *square.Square, prev_sq *square
 	}
 	return false
 }
-
 

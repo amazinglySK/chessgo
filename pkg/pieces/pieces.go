@@ -121,15 +121,15 @@ func GenStraightMoves(X, Y float64) [][]helpers.Coord {
 	moves := [][]helpers.Coord{}
 	set := []helpers.Coord{}
 	// The left side
-	for i := 0; i < int(X); i++ {
+	for i := int(X) - 1; i>= 0; i-- {
 		set = append(set, helpers.Coord{float64(i), Y})
 	}
 
 	moves = append(moves, set)
 	set = nil
 
-	// The bottom side
-	for i := 0; i < int(Y); i++ {
+	// The top side
+	for i := int(Y) - 1; i>=0 ; i-- {
 		set = append(set, helpers.Coord{X, float64(i)})
 	}
 
@@ -144,7 +144,7 @@ func GenStraightMoves(X, Y float64) [][]helpers.Coord {
 	moves = append(moves, set)
 	set = nil
 
-	// The top side
+	// The bottom side
 	for i := int(Y) + 1; i <= cfg.SquareCount; i++ {
 		set = append(set, helpers.Coord{X, float64(i)})
 	}

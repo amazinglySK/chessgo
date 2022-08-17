@@ -36,7 +36,7 @@ func (b King) Draw(dst *ebiten.Image) {
 
 func (b King) GenValidMoves() [][]helpers.Coord {
 	x, y := b.CurrPos.X, b.CurrPos.Y
-	moves := [][]helpers.Coord{{helpers.Coord{x + 1, y}}, {helpers.Coord{x - 1, y}}, {helpers.Coord{x, y + 1}}, {helpers.Coord{x, y - 1}}}
+	moves := [][]helpers.Coord{{helpers.Coord{x + 1, y}}, {helpers.Coord{x - 1, y}}, {helpers.Coord{x, y + 1}}, {helpers.Coord{x, y - 1}}, {helpers.Coord{x - 1, y - 1}}, {helpers.Coord{x + 1, y + 1}}, {helpers.Coord{x - 1, y + 1}}, {helpers.Coord{x + 1, y - 1}}}
 	return filterNegatives(moves)
 }
 
