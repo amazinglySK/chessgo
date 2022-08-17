@@ -1,10 +1,9 @@
 package pieces
 
 import (
-	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/amazinglySK/chessgo/pkg/cfg"
+	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
-	"image"
 )
 
 type Bishop struct {
@@ -14,23 +13,12 @@ type Bishop struct {
 }
 
 func InitBishop(pos helpers.Coord, color string) *Bishop {
-	var sprite *ebiten.Image
-	switch color {
-	case "white":
-		sprite = WhiteSprites.SubImage(image.Rect(16, 16, 32, 32)).(*ebiten.Image)
-	case "black":
-		sprite = BlackSprites.SubImage(image.Rect(16, 16, 32, 32)).(*ebiten.Image)
-	}
-
+	sprite := generateSprite(color, cfg.SpriteMap["bishop"])
 	return &Bishop{pos, color, sprite}
-
 }
 
 func (b Bishop) Draw(dst *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(5, 5)
-	op.GeoM.Translate(float64(cfg.BoardPadding)+b.CurrPos.X*float64(cfg.SquareSize), float64(cfg.BoardPadding)+b.CurrPos.Y*float64(cfg.SquareSize)-8)
-
+	op := generateDrawingOps(b.CurrPos)
 	dst.DrawImage(b.Sprite, op)
 }
 
@@ -53,4 +41,4 @@ func (b Bishop) GetColor() string {
 
 func (b *Bishop) Move(pos helpers.Coord) {
 	b.CurrPos = pos
-} 
+}

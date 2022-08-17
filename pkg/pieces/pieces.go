@@ -3,11 +3,12 @@ package pieces
 import (
 	"bytes"
 	_ "embed"
+	"image"
+	_ "image/png"
+
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
-	"image"
-	_ "image/png"
 )
 
 func check(err error) {
@@ -22,21 +23,27 @@ var whiteSpritesheet []byte
 //go:embed black_pieces.png
 var blackSpritesheet []byte
 
+//go:embed sprites.png
+var sprites []byte
+
 var (
 	WhiteSprites *ebiten.Image
 	BlackSprites *ebiten.Image
 )
 
 func init() {
+	/*
+		white_img, _, err := image.Decode(bytes.NewReader(whiteSpritesheet))
+		check(err)
 
-	white_img, _, err := image.Decode(bytes.NewReader(whiteSpritesheet))
+		black_img, _, err := image.Decode(bytes.NewReader(blackSpritesheet))
+		check(err)
+	*/
+	sprite, _, err := image.Decode(bytes.NewReader(sprites))
 	check(err)
-
-	black_img, _, err := image.Decode(bytes.NewReader(blackSpritesheet))
-	check(err)
-
-	WhiteSprites = ebiten.NewImageFromImage(white_img)
-	BlackSprites = ebiten.NewImageFromImage(black_img)
+	SpriteSheet := ebiten.NewImageFromImage(sprite)
+	WhiteSprites = SpriteSheet.SubImage(image.Rect(0, 0, 1200, 200)).(*ebiten.Image)
+	BlackSprites = SpriteSheet.SubImage(image.Rect(0, 200, 1200, 400)).(*ebiten.Image)
 
 }
 
@@ -46,6 +53,35 @@ type Piece interface {
 	GetPos() *helpers.Coord
 	GetColor() string
 	Move(helpers.Coord)
+}
+
+func generateDrawingOps(pos helpers.Coord) *ebiten.DrawImageOptions {
+	op := &ebiten.DrawImageOptions{}
+	t_x := float64(cfg.BoardPadding) + (pos.X)*float64(cfg.SquareSize)
+	t_y := float64(cfg.BoardPadding) + (pos.Y)*float64(cfg.SquareSize)
+	op.GeoM.Scale(cfg.ScaleFactor, cfg.ScaleFactor)
+	op.GeoM.Translate(t_x, t_y)
+
+	return op
+}
+
+func generateSprite(color string, SpriteIndex int) *ebiten.Image {
+	var sprite *ebiten.Image
+	var color_idx int
+	if color == "white" {
+		color_idx = 0
+	} else {
+		color_idx = 1
+	}
+	SpriteRect := image.Rect(SpriteIndex*cfg.PieceSize, cfg.PieceSize*color_idx, (SpriteIndex+1)*(cfg.PieceSize), cfg.PieceSize*(color_idx+1))
+	switch color {
+	case "white":
+		sprite = WhiteSprites.SubImage(SpriteRect).(*ebiten.Image)
+	case "black":
+		sprite = BlackSprites.SubImage(SpriteRect).(*ebiten.Image)
+	}
+
+	return sprite
 }
 
 func filterNegatives(coord [][]helpers.Coord) [][]helpers.Coord {
@@ -121,7 +157,7 @@ func GenStraightMoves(X, Y float64) [][]helpers.Coord {
 	moves := [][]helpers.Coord{}
 	set := []helpers.Coord{}
 	// The left side
-	for i := int(X) - 1; i>= 0; i-- {
+	for i := int(X) - 1; i >= 0; i-- {
 		set = append(set, helpers.Coord{float64(i), Y})
 	}
 
@@ -129,7 +165,7 @@ func GenStraightMoves(X, Y float64) [][]helpers.Coord {
 	set = nil
 
 	// The top side
-	for i := int(Y) - 1; i>=0 ; i-- {
+	for i := int(Y) - 1; i >= 0; i-- {
 		set = append(set, helpers.Coord{X, float64(i)})
 	}
 

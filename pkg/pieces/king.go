@@ -4,7 +4,6 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
-	"image"
 )
 
 type King struct {
@@ -14,23 +13,13 @@ type King struct {
 }
 
 func InitKing(pos helpers.Coord, color string) *King {
-	var sprite *ebiten.Image
-	switch color {
-	case "white":
-		sprite = WhiteSprites.SubImage(image.Rect(16, 32, 32, 48)).(*ebiten.Image)
-	case "black":
-		sprite = BlackSprites.SubImage(image.Rect(16, 32, 32, 48)).(*ebiten.Image)
-	}
-
+	sprite := generateSprite(color, cfg.SpriteMap["king"])
 	return &King{pos, color, sprite}
 
 }
 
 func (b King) Draw(dst *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(5, 5)
-	op.GeoM.Translate(float64(cfg.BoardPadding)+b.CurrPos.X*float64(cfg.SquareSize), float64(cfg.BoardPadding)+b.CurrPos.Y*float64(cfg.SquareSize)-4)
-
+	op := generateDrawingOps(b.CurrPos)
 	dst.DrawImage(b.Sprite, op)
 }
 

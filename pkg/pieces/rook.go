@@ -4,7 +4,6 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
-	"image"
 )
 
 type Rook struct {
@@ -14,26 +13,16 @@ type Rook struct {
 }
 
 func (b Rook) Draw(dst *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(5, 5)
-	op.GeoM.Translate(float64(cfg.BoardPadding)+b.CurrPos.X*float64(cfg.SquareSize), float64(cfg.BoardPadding)+b.CurrPos.Y*float64(cfg.SquareSize)-8)
-
+	op := generateDrawingOps(b.CurrPos)
 	dst.DrawImage(b.Sprite, op)
 }
-
 
 func (b Rook) GenValidMoves() [][]helpers.Coord {
 	return filterNegatives(GenStraightMoves(b.CurrPos.X, b.CurrPos.Y))
 }
 
 func InitRook(pos helpers.Coord, color string) *Rook {
-	var sprite *ebiten.Image
-	switch color {
-	case "white":
-		sprite = WhiteSprites.SubImage(image.Rect(16, 0, 32, 16)).(*ebiten.Image)
-	case "black":
-		sprite = BlackSprites.SubImage(image.Rect(16, 0, 32, 16)).(*ebiten.Image)
-	}
+	sprite := generateSprite(color, cfg.SpriteMap["rook"])
 	return &Rook{pos, color, sprite}
 }
 

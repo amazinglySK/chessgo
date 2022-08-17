@@ -4,7 +4,6 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
-	"image"
 )
 
 type Pawn struct {
@@ -16,30 +15,15 @@ type Pawn struct {
 func InitPawns(y int, w int, color string) []*Pawn {
 	pawns := []*Pawn{}
 	for i := 0; i < w; i++ {
-		var (
-			sprite *ebiten.Image
-		)
-		switch color {
-		case "white":
-			sprite = WhiteSprites.SubImage(image.Rect(0, 0, 16, 16)).(*ebiten.Image)
-		case "black":
-			sprite = BlackSprites.SubImage(image.Rect(0, 0, 16, 16)).(*ebiten.Image)
-		}
-
+		sprite := generateSprite(color, cfg.SpriteMap["pawn"])
 		pos := helpers.Coord{float64(i), float64(y)}
-
 		pawns = append(pawns, &Pawn{pos, color, sprite})
-
 	}
 	return pawns
-
 }
 
 func (b Pawn) Draw(dst *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(5, 5)
-	op.GeoM.Translate(float64(cfg.BoardPadding)+b.CurrPos.X*float64(cfg.SquareSize), float64(cfg.BoardPadding)+b.CurrPos.Y*float64(cfg.SquareSize)-8)
-
+	op := generateDrawingOps(b.CurrPos)
 	dst.DrawImage(b.Sprite, op)
 }
 

@@ -4,7 +4,6 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/hajimehoshi/ebiten/v2"
-	"image"
 )
 
 type Knight struct {
@@ -14,10 +13,7 @@ type Knight struct {
 }
 
 func (b Knight) Draw(dst *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(5, 5)
-	op.GeoM.Translate(float64(cfg.BoardPadding)+b.CurrPos.X*float64(cfg.SquareSize), float64(cfg.BoardPadding)+b.CurrPos.Y*float64(cfg.SquareSize)-8)
-
+	op := generateDrawingOps(b.CurrPos)
 	dst.DrawImage(b.Sprite, op)
 }
 
@@ -37,14 +33,7 @@ func (b Knight) GenValidMoves() [][]helpers.Coord {
 }
 
 func InitKnight(pos helpers.Coord, color string) *Knight {
-	var sprite *ebiten.Image
-	switch color {
-	case "white":
-		sprite = WhiteSprites.SubImage(image.Rect(0, 16, 16, 32)).(*ebiten.Image)
-	case "black":
-		sprite = BlackSprites.SubImage(image.Rect(0, 16, 16, 32)).(*ebiten.Image)
-	}
-
+	sprite := generateSprite(color, cfg.SpriteMap["knight"])
 	return &Knight{pos, color, sprite}
 }
 
