@@ -35,7 +35,7 @@ func (b Queen) GenValidMoves() [][]helpers.Coord {
 		moves = append(moves, i)
 	}
 
-	return filterNegatives(moves)
+	return moves
 }
 
 func (b Queen) GetPos() *helpers.Coord {

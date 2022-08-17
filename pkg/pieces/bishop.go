@@ -27,7 +27,7 @@ func (b Bishop) GenValidMoves() [][]helpers.Coord {
 	x := int(b.CurrPos.X)
 	y := int(b.CurrPos.Y)
 
-	return filterNegatives(GenDiagonalMoves(x, y))
+	return GenDiagonalMoves(x, y)
 
 }
 

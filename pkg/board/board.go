@@ -13,14 +13,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+
+// Board is the main struct holding data for the entire game
 type Board struct {
 	Squares       [][]*square.Square
 	CurrPlayerIdx uint
-	CurrPiece     pieces.Piece
 	Players       []*player.Player
 	PrevActives   []*square.Square
 }
 
+// makeSquare makes squares assigned with the right coordinates when given a width and height
 func makeSquares(w, h int) [][]*square.Square {
 	white := false
 	squares := [][]*square.Square{}
@@ -47,6 +49,7 @@ func makeSquares(w, h int) [][]*square.Square {
 	return squares
 }
 
+// genWhitePieces initiates all the white pieces with their starting positions
 func genWhitePieces(w int) []pieces.Piece {
 	pieces_slice := []pieces.Piece{}
 	pieces_slice = append(pieces_slice, pieces.InitBishop(helpers.Coord{X: 2, Y: 0}, "white"), pieces.InitBishop(helpers.Coord{X: float64(w - 3), Y: 0}, "white"))
@@ -60,6 +63,7 @@ func genWhitePieces(w int) []pieces.Piece {
 	return pieces_slice
 }
 
+// genBlackPieces initiate all the black pieces with their starting positions
 func genBlackPieces(w int) []pieces.Piece {
 	pieces_slice := []pieces.Piece{}
 	pieces_slice = append(pieces_slice, pieces.InitBishop(helpers.Coord{X: 2, Y: float64(w - 1)}, "black"), pieces.InitBishop(helpers.Coord{X: float64(w - 3), Y: float64(w - 1)}, "black"))
@@ -74,6 +78,7 @@ func genBlackPieces(w int) []pieces.Piece {
 	return pieces_slice
 }
 
+// UpdateInitialSquareState updates the occupied status and the piece on it
 func (b *Board) UpdateInitialSquareState() {
 	for _, player := range b.Players {
 		for _, piece := range player.Pieces {
@@ -85,6 +90,7 @@ func (b *Board) UpdateInitialSquareState() {
 	}
 }
 
+// InitBoard initiates a normal board of given width and height
 func InitBoard(w int, h int) Board {
 	squares := makeSquares(w, h)
 	whitePlayer := player.Player{Color: "white", Pieces: genWhitePieces(w)}
@@ -94,11 +100,13 @@ func InitBoard(w int, h int) Board {
 	return board
 }
 
+// GetSquare gets the square at a given position
 func (b *Board) GetSquare(pos helpers.Coord) *square.Square {
 	x, y := int(pos.X), int(pos.Y)
 	return b.Squares[y][x]
 }
 
+// Draw draws the board on the screen
 func (b *Board) Draw(dst *ebiten.Image) {
 	for _, row := range b.Squares {
 		for _, s := range row {
@@ -111,6 +119,7 @@ func (b *Board) Draw(dst *ebiten.Image) {
 
 }
 
+// ManageClick manages the click event
 func (b *Board) ManageClick() {
 	clicked, pos := events.CheckMouseEvents()
 	if clicked {
@@ -123,7 +132,7 @@ func (b *Board) ManageClick() {
 		// Selecting a piece
 		if sq.Occupied && sq.Piece.GetColor() == curr_player.Color {
 			piece := sq.Piece
-			b.CurrPiece = piece
+			curr_player.CurrPiece = piece
 			coords := piece.GenValidMoves()
 			var moves []helpers.Coord
 			switch piece.(type) {
@@ -151,18 +160,17 @@ func (b *Board) ManageClick() {
 		}
 
 		// Probably a capture or a normal move
-		if b.CurrPiece != nil {
+		if curr_player.CurrPiece != nil {
 				if (sq.Occupied && sq.Piece.GetColor() != curr_player.Color) || !sq.Occupied {
-				prev_sq := b.GetSquare(*b.CurrPiece.GetPos())
+				prev_sq := b.GetSquare(*curr_player.CurrPiece.GetPos())
 				move_sq := b.GetSquare(pos)
-				if curr_player.MovePiece(b.CurrPiece, move_sq, prev_sq) {
-					b.CurrPiece = nil
+				if curr_player.MovePiece(curr_player.CurrPiece, move_sq, prev_sq) {
+					curr_player.CurrPiece = nil
 					// Swapping the current player
 					b.CurrPlayerIdx = uint(len(b.Players)) - (b.CurrPlayerIdx + 1)
 				}else {
 					log.Println("invalid move")
 				}
-
 				return
 			}
 		}
@@ -170,6 +178,7 @@ func (b *Board) ManageClick() {
 	}
 }
 
+// Update updates the board's state according to click and other event(s)
 func (b *Board) Update() {
 	b.ManageClick()
 }

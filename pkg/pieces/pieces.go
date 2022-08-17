@@ -34,14 +34,21 @@ func init() {
 	BlackSprites = SpriteSheet.SubImage(image.Rect(0, 200, 1200, 400)).(*ebiten.Image)
 }
 
+// Piece is a collection of chess pieces
 type Piece interface {
+	// Draw draws the piece at given destination
 	Draw(dst *ebiten.Image)
+	// GenValidMoves generates valid moves for that particular class of piece
 	GenValidMoves() [][]helpers.Coord
+	// GetPos gets the current position of a piece
 	GetPos() *helpers.Coord
+	// GetColor gets the color of the piece (white/black)
 	GetColor() string
+	// Move moves the piece to a given position
 	Move(helpers.Coord)
 }
 
+// generateDrawingOps generates drawing options for the given sprite
 func generateDrawingOps(pos helpers.Coord) *ebiten.DrawImageOptions {
 	op := &ebiten.DrawImageOptions{}
 	t_x := float64(cfg.BoardPadding) + (pos.X)*float64(cfg.SquareSize)
@@ -52,6 +59,7 @@ func generateDrawingOps(pos helpers.Coord) *ebiten.DrawImageOptions {
 	return op
 }
 
+// generateSprite generates the sprite of a piece from the spritesheet
 func generateSprite(color string, SpriteIndex int) *ebiten.Image {
 	var sprite *ebiten.Image
 	var color_idx int
@@ -71,6 +79,7 @@ func generateSprite(color string, SpriteIndex int) *ebiten.Image {
 	return sprite
 }
 
+// filterNegatives filters the out of bounds moves
 func filterNegatives(coord [][]helpers.Coord) [][]helpers.Coord {
 	filtered := [][]helpers.Coord{}
 	for _, set := range coord {
@@ -90,6 +99,7 @@ func filterNegatives(coord [][]helpers.Coord) [][]helpers.Coord {
 	return filtered
 }
 
+// GenDiagonalMoves generates diagonal moves
 func GenDiagonalMoves(X, Y int) [][]helpers.Coord {
 	moves := [][]helpers.Coord{}
 	set := []helpers.Coord{}
@@ -140,6 +150,7 @@ func GenDiagonalMoves(X, Y int) [][]helpers.Coord {
 
 }
 
+// GenStraightMoves generate straight moves
 func GenStraightMoves(X, Y float64) [][]helpers.Coord {
 	moves := [][]helpers.Coord{}
 	set := []helpers.Coord{}
@@ -175,5 +186,5 @@ func GenStraightMoves(X, Y float64) [][]helpers.Coord {
 	moves = append(moves, set)
 	set = nil
 
-	return moves
+	return filterNegatives(moves)
 }

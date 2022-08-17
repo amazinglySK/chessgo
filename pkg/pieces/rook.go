@@ -18,7 +18,7 @@ func (b Rook) Draw(dst *ebiten.Image) {
 }
 
 func (b Rook) GenValidMoves() [][]helpers.Coord {
-	return filterNegatives(GenStraightMoves(b.CurrPos.X, b.CurrPos.Y))
+	return GenStraightMoves(b.CurrPos.X, b.CurrPos.Y)
 }
 
 func InitRook(pos helpers.Coord, color string) *Rook {
