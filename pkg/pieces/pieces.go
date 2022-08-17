@@ -17,11 +17,6 @@ func check(err error) {
 	}
 }
 
-//go:embed white_pieces.png
-var whiteSpritesheet []byte
-
-//go:embed black_pieces.png
-var blackSpritesheet []byte
 
 //go:embed sprites.png
 var sprites []byte
@@ -32,19 +27,11 @@ var (
 )
 
 func init() {
-	/*
-		white_img, _, err := image.Decode(bytes.NewReader(whiteSpritesheet))
-		check(err)
-
-		black_img, _, err := image.Decode(bytes.NewReader(blackSpritesheet))
-		check(err)
-	*/
 	sprite, _, err := image.Decode(bytes.NewReader(sprites))
 	check(err)
 	SpriteSheet := ebiten.NewImageFromImage(sprite)
 	WhiteSprites = SpriteSheet.SubImage(image.Rect(0, 0, 1200, 200)).(*ebiten.Image)
 	BlackSprites = SpriteSheet.SubImage(image.Rect(0, 200, 1200, 400)).(*ebiten.Image)
-
 }
 
 type Piece interface {
