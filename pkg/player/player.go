@@ -8,7 +8,6 @@ import (
 
 // Player is an object store the player color white/black and a set of valid moves of the current piece in focus and all the piece
 type Player struct {
-	Pieces     []pieces.Piece
 	Color      string
 	ValidMoves []helpers.Coord
 	CurrPiece  pieces.Piece
@@ -47,7 +46,7 @@ func (p Player) FilterPawnMoves(piece pieces.Piece, moves [][]helpers.Coord, squ
 			// This means it's a pawns diagonal move OR it could be the opening of a pawn
 			if sq.Color == curr_sq.Color {
 				// There's a piece which is of the opponent OR the square is in the current column and it is not occupied by any piece
-				if sq.Occupied && sq.Piece.GetColor() != piece.GetColor() || (sq.Pos.X == curr_sq.Pos.X && !sq.Occupied) {
+				if (sq.Occupied && sq.Piece.GetColor() != piece.GetColor() && sq.Pos.X != curr_sq.Pos.X) || (sq.Pos.X == curr_sq.Pos.X && !sq.Occupied) {
 					valid = append(valid, move)
 				}
 			} else {
@@ -63,8 +62,6 @@ func (p Player) FilterPawnMoves(piece pieces.Piece, moves [][]helpers.Coord, squ
 	return valid
 }
 
-
-
 // MovePiece moves a given piece to a valid square. If the move's a valid move then returns true else returns false.
 func (p Player) MovePiece(piece pieces.Piece, sq *square.Square, prev_sq *square.Square) bool {
 	for _, c := range p.ValidMoves {
@@ -74,6 +71,14 @@ func (p Player) MovePiece(piece pieces.Piece, sq *square.Square, prev_sq *square
 			sq.Piece = piece
 			sq.Occupied = true
 			piece.Move(sq.Pos)
+			switch piece.(type) {
+			case *pieces.Pawn:
+				if sq.Pos.Y == 7 || sq.Pos.Y == 0 {
+					q := pieces.InitQueen(sq.Pos, p.Color)
+					sq.Piece = q
+				}
+
+			}
 			return true
 		}
 	}

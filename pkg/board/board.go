@@ -81,14 +81,12 @@ func genBlackPieces(w int) []pieces.Piece {
 }
 
 // UpdateInitialSquareState updates the occupied status and the piece on it
-func (b *Board) UpdateInitialSquareState() {
-	for _, player := range b.Players {
-		for _, piece := range player.Pieces {
-			pos := *piece.GetPos()
-			sq := b.GetSquare(pos)
-			sq.Piece = piece
-			sq.Occupied = true
-		}
+func (b *Board) UpdateInitialSquareState(pieces []pieces.Piece) {
+	for _, piece := range pieces {
+		pos := *piece.GetPos()
+		sq := b.GetSquare(pos)
+		sq.Piece = piece
+		sq.Occupied = true
 	}
 }
 
@@ -101,16 +99,25 @@ func check(err error) {
 	}
 }
 
+func join(a []pieces.Piece, b []pieces.Piece) []pieces.Piece {
+	for _, i := range a {
+		b = append(b, i)
+	}
+
+	return b
+}
+
 // InitBoard initiates a normal board of given width and height
 func InitBoard(w int, h int, actx *audio.Context) Board {
 	// Squares
 	squares := makeSquares(w, h)
-	whitePlayer := player.Player{Color: "white", Pieces: genWhitePieces(w)}
-	blackPlayer := player.Player{Color: "black", Pieces: genBlackPieces(w)}
+	all_pieces := join(genWhitePieces(w), genBlackPieces(w))
+	whitePlayer := player.Player{Color: "white"}
+	blackPlayer := player.Player{Color: "black"}
 	capture, move := sounds.GetTracks(actx)
 	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}, MoveSound: move, CaptureSound: capture}
 
-	board.UpdateInitialSquareState()
+	board.UpdateInitialSquareState(all_pieces)
 
 	return board
 }
