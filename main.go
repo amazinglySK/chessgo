@@ -1,12 +1,12 @@
 package main
 
 import (
+	"log"
 	"github.com/amazinglySK/chessgo/pkg/board"
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/hajimehoshi/ebiten/v2"
-	"log"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
-
 
 func check(err error) {
 	if err != nil {
@@ -15,7 +15,7 @@ func check(err error) {
 }
 
 type Game struct {
-	Board     board.Board
+	Board board.Board
 }
 
 func (g *Game) Update() error {
@@ -32,10 +32,12 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return cfg.WindowWidth, cfg.WindowHeight
 }
 
+
 func main() {
 	ebiten.SetWindowSize(cfg.WindowWidth, cfg.WindowHeight)
 	ebiten.SetWindowTitle("Chess In Go")
-	if err := ebiten.RunGame(&Game{Board : board.InitBoard(8, 8)}); err != nil {
+	var audioContext = audio.NewContext(32000)
+	if err := ebiten.RunGame(&Game{Board: board.InitBoard(8, 8, audioContext)}); err != nil {
 		log.Fatal(err)
 	}
 }

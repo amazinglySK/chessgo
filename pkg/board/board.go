@@ -1,18 +1,18 @@
 package board
 
 import (
-	"image/color"
-	"log"
-
 	"github.com/amazinglySK/chessgo/pkg/cfg"
 	"github.com/amazinglySK/chessgo/pkg/events"
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/amazinglySK/chessgo/pkg/pieces"
 	"github.com/amazinglySK/chessgo/pkg/player"
+	"github.com/amazinglySK/chessgo/pkg/sounds"
 	"github.com/amazinglySK/chessgo/pkg/square"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"image/color"
+	"log"
 )
-
 
 // Board is the main struct holding data for the entire game
 type Board struct {
@@ -20,6 +20,8 @@ type Board struct {
 	CurrPlayerIdx uint
 	Players       []*player.Player
 	PrevActives   []*square.Square
+	CaptureSound  *audio.Player
+	MoveSound     *audio.Player
 }
 
 // makeSquare makes squares assigned with the right coordinates when given a width and height
@@ -90,13 +92,26 @@ func (b *Board) UpdateInitialSquareState() {
 	}
 }
 
+// go:embed move.ogg
+var moveRaw []byte
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 // InitBoard initiates a normal board of given width and height
-func InitBoard(w int, h int) Board {
+func InitBoard(w int, h int, actx *audio.Context) Board {
+	// Squares
 	squares := makeSquares(w, h)
 	whitePlayer := player.Player{Color: "white", Pieces: genWhitePieces(w)}
 	blackPlayer := player.Player{Color: "black", Pieces: genBlackPieces(w)}
-	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}}
+	capture, move := sounds.GetTracks(actx)
+	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}, MoveSound: move, CaptureSound: capture}
+
 	board.UpdateInitialSquareState()
+
 	return board
 }
 
@@ -111,7 +126,7 @@ func (b *Board) Draw(dst *ebiten.Image) {
 	for _, row := range b.Squares {
 		for _, s := range row {
 			s.Draw(dst)
-			if s.Piece != nil {
+			if s.Occupied {
 				s.Piece.Draw(dst)
 			}
 		}
@@ -161,16 +176,30 @@ func (b *Board) ManageClick() {
 
 		// Probably a capture or a normal move
 		if curr_player.CurrPiece != nil {
-				if (sq.Occupied && sq.Piece.GetColor() != curr_player.Color) || !sq.Occupied {
+			if (sq.Occupied && sq.Piece.GetColor() != curr_player.Color) || !sq.Occupied {
+				// Plays the sounds
+				switch sq.Occupied {
+				// Capture
+				case true:
+					b.CaptureSound.Rewind()
+					b.CaptureSound.Play()
+				
+				// Move
+				case false:
+					b.MoveSound.Rewind()
+					b.MoveSound.Play()
+				}
+
 				prev_sq := b.GetSquare(*curr_player.CurrPiece.GetPos())
 				move_sq := b.GetSquare(pos)
 				if curr_player.MovePiece(curr_player.CurrPiece, move_sq, prev_sq) {
 					curr_player.CurrPiece = nil
 					// Swapping the current player
 					b.CurrPlayerIdx = uint(len(b.Players)) - (b.CurrPlayerIdx + 1)
-				}else {
+				} else {
 					log.Println("invalid move")
 				}
+
 				return
 			}
 		}

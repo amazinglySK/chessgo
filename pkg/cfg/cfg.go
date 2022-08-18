@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"image/color"
+	_ "embed"
 )
 
 var (
