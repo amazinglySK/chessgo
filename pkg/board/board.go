@@ -6,6 +6,7 @@ import (
 	"github.com/amazinglySK/chessgo/pkg/helpers"
 	"github.com/amazinglySK/chessgo/pkg/pieces"
 	"github.com/amazinglySK/chessgo/pkg/player"
+	"github.com/amazinglySK/chessgo/pkg/sounds"
 	"github.com/amazinglySK/chessgo/pkg/square"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -101,12 +102,13 @@ func check(err error) {
 }
 
 // InitBoard initiates a normal board of given width and height
-func InitBoard(w int, h int, move *audio.Player) Board {
+func InitBoard(w int, h int, actx *audio.Context) Board {
 	// Squares
 	squares := makeSquares(w, h)
 	whitePlayer := player.Player{Color: "white", Pieces: genWhitePieces(w)}
 	blackPlayer := player.Player{Color: "black", Pieces: genBlackPieces(w)}
-	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}, MoveSound:move}
+	capture, move := sounds.GetTracks(actx)
+	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}, MoveSound: move, CaptureSound: capture}
 
 	board.UpdateInitialSquareState()
 
@@ -177,9 +179,14 @@ func (b *Board) ManageClick() {
 			if (sq.Occupied && sq.Piece.GetColor() != curr_player.Color) || !sq.Occupied {
 				// Plays the sounds
 				switch sq.Occupied {
+				// Capture
 				case true:
+					b.CaptureSound.Rewind()
 					b.CaptureSound.Play()
+				
+				// Move
 				case false:
+					b.MoveSound.Rewind()
 					b.MoveSound.Play()
 				}
 
