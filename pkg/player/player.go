@@ -44,10 +44,10 @@ func (p Player) FilterPawnMoves(piece pieces.Piece, moves [][]helpers.Coord, squ
 			sq := squares[y][x]
 			curr_sq := squares[curr_y][curr_x]
 
-			// This means it's a pawns diagonal move
+			// This means it's a pawns diagonal move OR it could be the opening of a pawn
 			if sq.Color == curr_sq.Color {
-				// There's a piece which is of the opponent
-				if sq.Occupied && sq.Piece.GetColor() != piece.GetColor() {
+				// There's a piece which is of the opponent OR the square is in the current column and it is not occupied by any piece
+				if sq.Occupied && sq.Piece.GetColor() != piece.GetColor() || (sq.Pos.X == curr_sq.Pos.X && !sq.Occupied) {
 					valid = append(valid, move)
 				}
 			} else {

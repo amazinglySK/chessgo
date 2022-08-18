@@ -7,9 +7,10 @@ import (
 )
 
 type Pawn struct {
-	CurrPos helpers.Coord
-	Color   string
-	Sprite  *ebiten.Image
+	CurrPos   helpers.Coord
+	Color     string
+	Sprite    *ebiten.Image
+	FirstMove bool
 }
 
 func InitPawns(y int, w int, color string) []*Pawn {
@@ -17,7 +18,7 @@ func InitPawns(y int, w int, color string) []*Pawn {
 	for i := 0; i < w; i++ {
 		sprite := generateSprite(color, cfg.SpriteMap["pawn"])
 		pos := helpers.Coord{float64(i), float64(y)}
-		pawns = append(pawns, &Pawn{pos, color, sprite})
+		pawns = append(pawns, &Pawn{pos, color, sprite, true})
 	}
 	return pawns
 }
@@ -30,10 +31,22 @@ func (b Pawn) Draw(dst *ebiten.Image) {
 func (b Pawn) GenValidMoves() [][]helpers.Coord {
 	x, y := b.CurrPos.X, b.CurrPos.Y
 	var moves [][]helpers.Coord
+	var extra []helpers.Coord 
+
 	if b.Color == "white" {
-		moves = [][]helpers.Coord{{helpers.Coord{x + 1, y + 1}}, {helpers.Coord{x - 1, y + 1}}, {helpers.Coord{x, y + 1}}}
+		if b.FirstMove {
+			extra = []helpers.Coord{helpers.Coord{x, y + 1}, helpers.Coord{x, y + 2}}
+		}else {
+			extra = []helpers.Coord{helpers.Coord{x, y + 1}}
+		}
+		moves = [][]helpers.Coord{{helpers.Coord{x + 1, y + 1}}, {helpers.Coord{x - 1, y + 1}}, extra}
 	} else {
-		moves = [][]helpers.Coord{{helpers.Coord{x + 1, y - 1}}, {helpers.Coord{x - 1, y - 1}}, {helpers.Coord{x, y - 1}}}
+		if b.FirstMove {
+			extra = []helpers.Coord{helpers.Coord{x, y - 1}, helpers.Coord{x, y - 2}}
+		}else {
+			extra = []helpers.Coord{helpers.Coord{x, y - 1}}
+		}
+		moves = [][]helpers.Coord{{helpers.Coord{x + 1, y - 1}}, {helpers.Coord{x - 1, y - 1}}, extra}
 	}
 
 	return filterNegatives(moves)
@@ -48,5 +61,6 @@ func (b Pawn) GetColor() string {
 }
 
 func (b *Pawn) Move(pos helpers.Coord) {
+	b.FirstMove = false
 	b.CurrPos = pos
 }

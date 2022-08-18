@@ -146,6 +146,7 @@ func (b *Board) ManageClick() {
 
 		// Selecting a piece
 		if sq.Occupied && sq.Piece.GetColor() == curr_player.Color {
+
 			piece := sq.Piece
 			curr_player.CurrPiece = piece
 			coords := piece.GenValidMoves()
@@ -189,11 +190,13 @@ func (b *Board) ManageClick() {
 					b.MoveSound.Rewind()
 					b.MoveSound.Play()
 				}
-
+				
 				prev_sq := b.GetSquare(*curr_player.CurrPiece.GetPos())
 				move_sq := b.GetSquare(pos)
 				if curr_player.MovePiece(curr_player.CurrPiece, move_sq, prev_sq) {
 					curr_player.CurrPiece = nil
+
+
 					// Swapping the current player
 					b.CurrPlayerIdx = uint(len(b.Players)) - (b.CurrPlayerIdx + 1)
 				} else {
