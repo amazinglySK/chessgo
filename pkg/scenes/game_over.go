@@ -1,18 +1,25 @@
 package scenes
 
 import (
+	"bytes"
+	_ "embed"
+	"fmt"
 	"github.com/amazinglySK/chessgo/pkg/events"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/text"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
-	_ "image/png"
 	"image"
 	"image/color"
+	_ "image/png"
 	"log"
 )
+
+//go:embed reload.png
+var replayImg []byte
+
+//go:embed scene_font.ttf
+var scene_font []byte
 
 type GameOverScene struct {
 	font   font.Face
@@ -20,38 +27,40 @@ type GameOverScene struct {
 	replay *ebiten.Image
 }
 
-func InitGameOverScene(w, h int) GameOverScene {
-	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+func check(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
-	const dpi = 72
+func InitGameOverScene(w, h int) GameOverScene {
+	tt, err := opentype.Parse(scene_font)
+	check(err)
+
+	const dpi = 80 
 	mplusNormalFont, err := opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    24,
+		Size:    48,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	
-	img, _, err := ebitenutil.NewImageFromFile("./pkg/scenes/reload.png")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
-	return GameOverScene{font: mplusNormalFont, replay: img}
+	img, _, err := image.Decode(bytes.NewReader(replayImg))
+	check(err)
+
+	sprite := ebiten.NewImageFromImage(img)
+
+	return GameOverScene{font: mplusNormalFont, replay: sprite}
 
 }
 
 func (g GameOverScene) Draw(dst *ebiten.Image) {
 	const x = 20
-	text.Draw(dst, "Game Over", g.font, x, 40, color.White)
-	text.Draw(dst, g.winner, g.font, x, 60, color.White)
+	text.Draw(dst, "Game Over", g.font, x, 60, color.White)
+	text.Draw(dst, fmt.Sprintf("%v won", g.winner), g.font, x, 150, color.White)
 
 	ops := &ebiten.DrawImageOptions{}
-	ops.GeoM.Translate(x, 80)
+	ops.GeoM.Translate(x, 200)
 	dst.DrawImage(g.replay, ops)
 }
 
