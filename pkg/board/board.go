@@ -16,6 +16,7 @@ import (
 
 // Board is the main struct holding data for the entire game
 type Board struct {
+	width, height int
 	Squares       [][]*square.Square
 	CurrPlayerIdx uint
 	Players       []*player.Player
@@ -115,7 +116,7 @@ func InitBoard(w int, h int, actx *audio.Context) Board {
 	whitePlayer := player.Player{Color: "white"}
 	blackPlayer := player.Player{Color: "black"}
 	capture, move := sounds.GetTracks(actx)
-	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}, MoveSound: move, CaptureSound: capture}
+	board := Board{Squares: squares, CurrPlayerIdx: 0, Players: []*player.Player{&whitePlayer, &blackPlayer}, PrevActives: []*square.Square{}, MoveSound: move, CaptureSound: capture, width:w, height:h}
 
 	board.UpdateInitialSquareState(all_pieces)
 
@@ -129,7 +130,7 @@ func (b *Board) GetSquare(pos helpers.Coord) *square.Square {
 }
 
 // Draw draws the board on the screen
-func (b *Board) Draw(dst *ebiten.Image) {
+func (b Board) Draw(dst *ebiten.Image) {
 	for _, row := range b.Squares {
 		for _, s := range row {
 			s.Draw(dst)
@@ -142,8 +143,8 @@ func (b *Board) Draw(dst *ebiten.Image) {
 }
 
 // ManageClick manages the click event
-func (b *Board) ManageClick() {
-	clicked, pos := events.CheckMouseEvents()
+func (b *Board) ManageClick() bool {
+	clicked, pos := events.CheckMouseEvents(false)
 	if clicked {
 		// Deactivating all previously activated sqs
 		square.Deactivate(b.PrevActives)
@@ -179,11 +180,12 @@ func (b *Board) ManageClick() {
 				b.PrevActives = append(b.PrevActives, sq)
 			}
 
-			return
+			return false
 		}
 
 		// Probably a capture or a normal move
 		if curr_player.CurrPiece != nil {
+			var king_cap = false
 			if (sq.Occupied && sq.Piece.GetColor() != curr_player.Color) || !sq.Occupied {
 				// Plays the sounds
 				switch sq.Occupied {
@@ -191,33 +193,63 @@ func (b *Board) ManageClick() {
 				case true:
 					b.CaptureSound.Rewind()
 					b.CaptureSound.Play()
-				
+
 				// Move
 				case false:
 					b.MoveSound.Rewind()
 					b.MoveSound.Play()
 				}
-				
+
 				prev_sq := b.GetSquare(*curr_player.CurrPiece.GetPos())
 				move_sq := b.GetSquare(pos)
+				switch move_sq.Piece.(type) {
+				case *pieces.King:
+					king_cap = true
+
+				}
 				if curr_player.MovePiece(curr_player.CurrPiece, move_sq, prev_sq) {
 					curr_player.CurrPiece = nil
-
-
 					// Swapping the current player
 					b.CurrPlayerIdx = uint(len(b.Players)) - (b.CurrPlayerIdx + 1)
+
 				} else {
 					log.Println("invalid move")
 				}
 
-				return
+				return king_cap
 			}
 		}
 
 	}
+
+	return false
 }
 
 // Update updates the board's state according to click and other event(s)
-func (b *Board) Update() {
-	b.ManageClick()
+func (b *Board) Update() (bool, string) {
+	if b.ManageClick() {
+		b.CurrPlayerIdx = uint(len(b.Players)) - (b.CurrPlayerIdx + 1)
+		return true, b.Players[b.CurrPlayerIdx].Color
+	}
+
+
+	return false, ""
+}
+
+func (b *Board) Reset() {
+	for _, i := range b.Squares {
+		for _, j := range i {
+			j.Piece = nil
+			j.Occupied = false
+		}
+	}
+
+	for _, player := range b.Players {
+		player.ValidMoves = nil
+		player.CurrPiece = nil
+	}
+
+	b.UpdateInitialSquareState(join(genWhitePieces(b.width), genBlackPieces(b.width)))
+	b.CurrPlayerIdx = 0
+	b.PrevActives = nil
 }
