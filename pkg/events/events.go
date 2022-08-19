@@ -7,9 +7,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-func CheckMouseEvents() (bool, helpers.Coord) {
+func CheckMouseEvents(raw bool) (bool, helpers.Coord) {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		x, y := ebiten.CursorPosition()
+		if raw {
+			return true, helpers.Coord{float64(x), float64(y)}
+		}
 		x, y = (x-cfg.BoardPadding)/cfg.SquareSize, (y-cfg.BoardPadding)/cfg.SquareSize
 		return true, helpers.Coord{X: float64(x), Y: float64(y)}
 	}
