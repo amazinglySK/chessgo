@@ -18,3 +18,13 @@ func CheckMouseEvents(raw bool) (bool, helpers.Coord) {
 	}
 	return false, helpers.Coord{}
 }
+
+func CheckKbEvents(key_string string) bool {
+	for _, k := range inpututil.PressedKeys() {
+		if k.String() == key_string {
+			return true
+		}
+	}
+
+	return false
+}

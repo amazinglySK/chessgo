@@ -1,7 +1,6 @@
 package scenes
 
 import (
-	"bytes"
 	_ "embed"
 	"fmt"
 	"github.com/amazinglySK/chessgo/pkg/events"
@@ -9,14 +8,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
-	"image"
 	"image/color"
-	_ "image/png"
 	"log"
 )
 
-//go:embed reload.png
-var replayImg []byte
 
 //go:embed scene_font.ttf
 var scene_font []byte
@@ -24,8 +19,8 @@ var scene_font []byte
 type GameOverScene struct {
 	font   font.Face
 	winner string
-	replay *ebiten.Image
 }
+
 
 func check(err error) {
 	if err != nil {
@@ -33,7 +28,7 @@ func check(err error) {
 	}
 }
 
-func InitGameOverScene(w, h int) GameOverScene {
+func InitGameOverScene(_w, _h int) GameOverScene {
 	tt, err := opentype.Parse(scene_font)
 	check(err)
 
@@ -45,12 +40,8 @@ func InitGameOverScene(w, h int) GameOverScene {
 	})
 	check(err)
 
-	img, _, err := image.Decode(bytes.NewReader(replayImg))
-	check(err)
 
-	sprite := ebiten.NewImageFromImage(img)
-
-	return GameOverScene{font: mplusNormalFont, replay: sprite}
+	return GameOverScene{font: mplusNormalFont}
 
 }
 
@@ -58,10 +49,8 @@ func (g GameOverScene) Draw(dst *ebiten.Image) {
 	const x = 20
 	text.Draw(dst, "Game Over", g.font, x, 60, color.White)
 	text.Draw(dst, fmt.Sprintf("%v won", g.winner), g.font, x, 150, color.White)
+	text.Draw(dst, "Press R to restart", g.font, x, 240, color.White)
 
-	ops := &ebiten.DrawImageOptions{}
-	ops.GeoM.Translate(x, 200)
-	dst.DrawImage(g.replay, ops)
 }
 
 func (g *GameOverScene) SetWinner(winner string) {
@@ -69,12 +58,8 @@ func (g *GameOverScene) SetWinner(winner string) {
 }
 
 func (g GameOverScene) Update() bool {
-	click, pos := events.CheckMouseEvents(true)
-
-	if click {
-		if image.Pt(int(pos.X), int(pos.Y)).In(g.replay.Bounds()) {
-			return true
-		}
+	if events.CheckKbEvents("R") {
+		return true
 	}
 
 	return false
