@@ -91,9 +91,16 @@ func (b *Board) PlaySound(sq *square.Square) {
 // ManageClick manages the click event return if a player won or not
 func (b *Board) ManageClick() bool {
 	clicked, pos := events.CheckMouseEvents(false)
+
+
 	if clicked {
 		// Deactivating all previously activated sqs
 		square.Deactivate(b.PrevActives)
+
+		// Out of bounds
+		if int(pos.X) < 0 || int(pos.X) >= b.width || int(pos.Y) < 0 || int(pos.Y) >= b.height {
+			return false
+		}
 
 		sq := b.GetSquare(pos)
 		curr_player := b.Players[b.CurrPlayerIdx]
