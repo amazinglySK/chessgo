@@ -2,12 +2,14 @@
 
 Chess implementation in the Go Programming Language using the [ebiten](https://ebiten.org/) library.
 
-## Game features 
+## Game shortcomings 
 
-- There's no check alert i.e. Game ends when the opponent captured your king
+- There's no check alert
+- Game ends when the king is captured
+- You cannot castle so don't hold yourself back from moving the king when you need to
 - Local Multiplayer (isn't online)
 
-*:stopwatch: I know these are not features but, sorry, didn't have much time for this project...*
+*:stopwatch: Sorry, didn't have much time for this project...*
 
 ## Quickstart
 
