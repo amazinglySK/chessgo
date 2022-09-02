@@ -11,7 +11,7 @@ import (
 
 // makeSquare makes squares assigned with the right coordinates when given a width and height
 func makeSquares(w, h int) [][]*square.Square {
-	white := false
+	white := true
 	squares := [][]*square.Square{}
 	for i := 0; i < h; i++ {
 		row := []*square.Square{}
@@ -42,8 +42,8 @@ func genWhitePieces(w int) []pieces.Piece {
 	pieces_slice = append(pieces_slice, pieces.InitBishop(helpers.Coord{X: 2, Y: 0}, "white"), pieces.InitBishop(helpers.Coord{X: float64(w - 3), Y: 0}, "white"))
 	pieces_slice = append(pieces_slice, pieces.InitRook(helpers.Coord{X: 0, Y: 0}, "white"), pieces.InitRook(helpers.Coord{X: float64(w - 1), Y: 0}, "white"))
 	pieces_slice = append(pieces_slice, pieces.InitKnight(helpers.Coord{X: 1, Y: 0}, "white"), pieces.InitKnight(helpers.Coord{X: float64(w - 2), Y: 0}, "white"))
-	pieces_slice = append(pieces_slice, pieces.InitQueen(helpers.Coord{X: 3, Y: 0}, "white"))
-	pieces_slice = append(pieces_slice, pieces.InitKing(helpers.Coord{X: 4, Y: 0}, "white"))
+	pieces_slice = append(pieces_slice, pieces.InitQueen(helpers.Coord{X: 4, Y: 0}, "white"))
+	pieces_slice = append(pieces_slice, pieces.InitKing(helpers.Coord{X: 3, Y: 0}, "white"))
 	for _, pawn := range pieces.InitPawns(1, w, "white") {
 		pieces_slice = append(pieces_slice, pawn)
 	}
@@ -56,8 +56,8 @@ func genBlackPieces(w int) []pieces.Piece {
 	pieces_slice = append(pieces_slice, pieces.InitBishop(helpers.Coord{X: 2, Y: float64(w - 1)}, "black"), pieces.InitBishop(helpers.Coord{X: float64(w - 3), Y: float64(w - 1)}, "black"))
 	pieces_slice = append(pieces_slice, pieces.InitRook(helpers.Coord{X: 0, Y: float64(w - 1)}, "black"), pieces.InitRook(helpers.Coord{X: float64(w - 1), Y: float64(w - 1)}, "black"))
 	pieces_slice = append(pieces_slice, pieces.InitKnight(helpers.Coord{X: 1, Y: float64(w - 1)}, "black"), pieces.InitKnight(helpers.Coord{X: float64(w - 2), Y: float64(w - 1)}, "black"))
-	pieces_slice = append(pieces_slice, pieces.InitQueen(helpers.Coord{X: 3, Y: float64(w - 1)}, "black"))
-	pieces_slice = append(pieces_slice, pieces.InitKing(helpers.Coord{X: 4, Y: float64(w - 1)}, "black"))
+	pieces_slice = append(pieces_slice, pieces.InitQueen(helpers.Coord{X: 4, Y: float64(w - 1)}, "black"))
+	pieces_slice = append(pieces_slice, pieces.InitKing(helpers.Coord{X: 3, Y: float64(w - 1)}, "black"))
 	for _, pawn := range pieces.InitPawns(w-2, w, "black") {
 		pieces_slice = append(pieces_slice, pawn)
 	}
